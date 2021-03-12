@@ -1,0 +1,60 @@
+name: masterArtifacts
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  releaseJar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 14
+      - name: Cache .gradle/caches
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-
+      - name: Cache .gradle/wrapper
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-wrapper-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew jar -s
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: RandomEntryPro Artifact
+          path: build/libs/*.jar
+      - name: Zip file
+        run: |
+          zip -r RandomEntryPro.zip build/libs/*.jar
+      - name: Create version
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: Auto_${{ github.run_id }}
+          release_name: ActionsAutoBuild
+          draft: false
+          prerelease: false
+      - name: Put version
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./RandomEntryPro.zip
+          asset_name: RandomEntryPro.zip
+          asset_content_type: application/zip
