@@ -1,0 +1,19 @@
+Title: "&l[相思梦泽] - 随机鉴定"
+Shape:
+  - '#########'
+  - '#       #'
+  - '#       #'
+  - '#       #'
+  - '#########'
+Buttons:
+  '#':
+    display:
+      mats: WHITE_STAINED_GLASS_PANE
+      name: "&7&l梦泽界限"
+      lore:
+        - ""
+        - "&7&l无法逾越的底线"
+        - "&7&l&m================="
+        - "&8&l&o插件编写者:冰上云梦"
+      flag:
+        - "HIDE_ATTRIBUTES"
