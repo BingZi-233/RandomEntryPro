@@ -1,4 +1,2 @@
-Draw:
-  ExistingWarehouse: '您当前存在以下临时仓库：'
-  WarehouseList: '> %s'
-  NoSuchWarehouse: '没有这个仓库，请检查您输入的仓库是否正确。'
+Identify:
+  Complete: '鉴定完成！成功:%s,失败:%s,未找到:%s,共计完成:%s。'

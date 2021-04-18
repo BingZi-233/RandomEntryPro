@@ -1,4 +1,8 @@
 test:
+  # 花费的点券
+  Spend: 100
+  # 检测的Lore
   IdentifyLore: "点券测试"
+  # 随机出来的词条
   RandomList:
     - "点券鉴定成功"

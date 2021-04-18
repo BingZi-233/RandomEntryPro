@@ -1,5 +1,3 @@
-
-
 #         Powered by TabooLib 5.0         #
 
 
@@ -7,6 +5,7 @@ name: ${name}
 main: ${main}
 version: ${version}
 authors: [ '冰上云梦' ]
+depend: [ Vault,PlayerPoints ]
 
 api-version: 1.13
 

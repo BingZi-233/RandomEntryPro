@@ -1,4 +1,8 @@
 test:
+  # 花费的金币
+  Spend: 100
+  # 检测的Lore
   IdentifyLore: "金币测试"
+  # 随机出来的词条
   RandomList:
     - "金币鉴定成功"

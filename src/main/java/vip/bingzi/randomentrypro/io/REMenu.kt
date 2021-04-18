@@ -1,6 +1,7 @@
 package vip.bingzi.randomentrypro.io
 
 import io.izzel.taboolib.module.config.TConfig
+import io.izzel.taboolib.module.locale.TLocale
 import io.izzel.taboolib.module.nms.nbt.NBTBase
 import io.izzel.taboolib.util.item.ItemBuilder
 import io.izzel.taboolib.util.item.inventory.MenuBuilder
@@ -10,9 +11,12 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
+import vip.bingzi.randomentrypro.util.REPlayerPoints
 import vip.bingzi.randomentrypro.util.REUtil.getNBTCompound
 import vip.bingzi.randomentrypro.util.REUtil.logger
+import vip.bingzi.randomentrypro.util.REVault
 import java.io.File
+import kotlin.system.measureTimeMillis
 
 object REMenu {
     /**
@@ -74,20 +78,24 @@ object REMenu {
             it.event { clickEvent ->
                 when (clickEvent.slot) {
                     ' ' -> {
-                        logger.finest("${clickEvent.clicker.name}的点击被更改为了点击事件。")
+                        logger.verbose("${clickEvent.clicker.name}的点击被更改为了点击事件。")
                     }
                     'A' -> {
-                        logger.finest("${clickEvent.clicker.name}的点击被更改金币鉴定事件。")
+                        logger.verbose("${clickEvent.clicker.name}的点击被更改金币鉴定事件。")
                         clickEvent.isCancelled = true
                         val appraisalScope = appraisalScope(clickEvent.inventory)
                         if (appraisalScope.size == 0) {
                             logger.fine("没有待鉴定的物品。")
                             return@event
                         }
-                        determine(appraisalScope, clickEvent.inventory, "vaultidentify", plugin)
+                        val measureTimeMillis = measureTimeMillis {
+                            determine(appraisalScope, clickEvent.inventory, "vaultidentify", plugin, player)
+                        }
+                        logger.fine("金币鉴定耗时${measureTimeMillis}")
+
                     }
                     'B' -> {
-                        logger.finest("${clickEvent.clicker.name}的点击被更改取消事件。")
+                        logger.verbose("${clickEvent.clicker.name}的点击被更改取消事件。")
                         clickEvent.isCancelled = true
                         val appraisalScope = appraisalScope(clickEvent.inventory)
                         if (appraisalScope.size == 0) {
@@ -97,17 +105,20 @@ object REMenu {
                         cancel(appraisalScope, clickEvent.inventory, player)
                     }
                     'C' -> {
-                        logger.finest("${clickEvent.clicker.name}的点击被更改点券鉴定事件。")
+                        logger.verbose("${clickEvent.clicker.name}的点击被更改点券鉴定事件。")
                         clickEvent.isCancelled = true
                         val appraisalScope = appraisalScope(clickEvent.inventory)
                         if (appraisalScope.size == 0) {
                             logger.fine("没有待鉴定的物品。")
                             return@event
                         }
-                        determine(appraisalScope, clickEvent.inventory, "pointsidentify", plugin)
+                        val measureTimeMillis = measureTimeMillis {
+                            determine(appraisalScope, clickEvent.inventory, "pointsidentify", plugin, player)
+                        }
+                        logger.fine("点券鉴定耗时${measureTimeMillis}")
                     }
                     else -> {
-                        logger.finest("${clickEvent.clicker.name}的点击被取消。")
+                        logger.verbose("${clickEvent.clicker.name}的点击被取消。")
                         clickEvent.isCancelled = true
                     }
                 }
@@ -127,32 +138,45 @@ object REMenu {
      * 检测界面中有多少等待检测的物品
      */
     private fun appraisalScope(inventory: Inventory): ArrayList<Int> {
-        logger.finest("界面大小为${inventory.size}")
+        logger.verbose("界面大小为${inventory.size}")
         val list = arrayListOf<Int>()
         for ((i, itemStack) in inventory.storageContents.withIndex()) {
             try {
-                logger.finest("第${i + 1}个物品名称为${itemStack.itemMeta?.displayName}")
+                logger.verbose("第${i + 1}个物品名称为${itemStack.itemMeta?.displayName}")
                 getNBTCompound(itemStack).also {
                     if (it["Menu"].toString() != "true") {
-                        logger.fine("已经第${i + 1}个物品加入玩家物品列表中")
+                        logger.verbose("已经第${i + 1}个物品加入玩家物品列表中")
                         list.add(i)
                     }
                 }
             } catch (e: Exception) {
-                logger.finest("第${i + 1}个物品为空")
+                logger.verbose("第${i + 1}个物品为空")
             }
         }
-        logger.fine("玩家的物品位置：${list}")
+        logger.verbose("玩家的物品位置：${list}")
         return list
     }
 
-    private fun determine(list: ArrayList<Int>, inventory: Inventory, info: String, plugin: Plugin) {
+    /**
+     * 实际鉴定流程
+     * @param list 要鉴定的物品位置
+     * @param inventory 要鉴定的页面
+     * @param info 以什么方式进行鉴定
+     * @param plugin 插件主体
+     * @param player 玩家
+     */
+    private fun determine(list: ArrayList<Int>, inventory: Inventory, info: String, plugin: Plugin, player: Player) {
         val config = TConfig.create(File("${plugin.dataFolder}/${info}.yml"))
         val identifyLoreToRandomList = hashMapOf<String, List<String>>()
+        val identifyLoreToNode = hashMapOf<String, String>()
         for (s in config.getKeys(false)) {
             val string = config.getStringColored("${s}.IdentifyLore")
+            identifyLoreToNode[string] = s
             identifyLoreToRandomList[string] = config.getStringListColored("${s}.RandomList")
         }
+        var success = 0
+        var failure = 0
+        var notFound = 0
         for (i in list) {
             logger.finest("正在鉴定${i + 1}处位置的物品")
             val item = inventory.getItem(i)
@@ -163,10 +187,34 @@ object REMenu {
                     if (lore != null) {
                         for (key in identifyLoreToRandomList.keys) {
                             if (lore.indexOf(key) != -1) {
+                                when (info) {
+                                    "vaultidentify" -> {
+                                        val bankWithdraw = REVault.getEconomy()
+                                            .bankWithdraw(player.name,
+                                                config.getDouble("${identifyLoreToNode[key]}.Spend"))
+                                        logger.finest("金币扣除结果：${bankWithdraw.transactionSuccess()}，返回类型：${bankWithdraw.type}")
+                                        if (!bankWithdraw.transactionSuccess()) {
+                                            failure += 1
+                                            continue
+                                        }
+                                    }
+                                    "pointsidentify" -> {
+                                        val take = REPlayerPoints.getPlayerPointsAPI()
+                                            .take(player.uniqueId, config.getInt("${identifyLoreToNode[key]}.Spend"))
+                                        logger.finest("点券扣除结果：${take}")
+                                        if (!take) {
+                                            failure += 1
+                                            continue
+                                        }
+                                    }
+                                }
                                 lore[lore.indexOf(key)] = identifyLoreToRandomList[key]!!.random()
                                 itemMeta.lore = lore
                                 item.itemMeta = itemMeta
                                 inventory.setItem(i, item)
+                                success += 1
+                            } else {
+                                notFound += 1
                             }
                         }
                         logger.fine("已鉴定${i + 1}处位置的物品")
@@ -180,6 +228,7 @@ object REMenu {
                 logger.fine("${i + 1}处位置的物品为空，不支持鉴定。")
             }
         }
+        player.sendMessage(TLocale.asString("Identify.Complete").format(success, failure, notFound, list.size))
     }
 
     /**

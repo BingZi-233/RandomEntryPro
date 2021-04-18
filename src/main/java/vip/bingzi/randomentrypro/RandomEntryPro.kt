@@ -5,7 +5,9 @@ import io.izzel.taboolib.module.config.TConfig
 import io.izzel.taboolib.module.inject.TInject
 import io.izzel.taboolib.module.locale.logger.TLogger
 import vip.bingzi.randomentrypro.io.REMenu.menuInspection
+import vip.bingzi.randomentrypro.util.REPlayerPoints
 import vip.bingzi.randomentrypro.util.REUtil.logger
+import vip.bingzi.randomentrypro.util.REVault
 
 object RandomEntryPro : Plugin() {
     @TInject(value = ["pointsidentify.yml"], locale = "LOCALE-PRIORITY")
@@ -38,6 +40,11 @@ object RandomEntryPro : Plugin() {
             "FATAL" -> TLogger.FATAL
             else -> TLogger.INFO
         }
+        logger.info("依赖载入状态：")
+        logger.info("> Vault")
+        logger.info("-   ${REVault.setupEconomy()}")
+        logger.info("> PlayerPoints")
+        logger.info("-   ${REPlayerPoints.hookPlayerPoints()}")
         logger.info("初始化完成")
     }
 
