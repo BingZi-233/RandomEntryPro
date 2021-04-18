@@ -6,7 +6,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import vip.bingzi.randomentrypro.RandomEntryPro;
 
 public class REVault {
-    public static Economy econ = null;
+    private static Economy econ = null;
 
     public static boolean setupEconomy() {
         if (RandomEntryPro.INSTANCE.getPlugin().getServer().getPluginManager().getPlugin("Vault") == null) {

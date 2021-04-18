@@ -190,9 +190,11 @@ object REMenu {
                                 when (info) {
                                     "vaultidentify" -> {
                                         val bankWithdraw = REVault.getEconomy()
-                                            .bankWithdraw(player.name,
+                                            .withdrawPlayer(player,
                                                 config.getDouble("${identifyLoreToNode[key]}.Spend"))
-                                        logger.finest("金币扣除结果：${bankWithdraw.transactionSuccess()}，返回类型：${bankWithdraw.type}")
+                                        logger.verbose("金币扣除结果：${bankWithdraw.transactionSuccess()}，返回类型：${bankWithdraw.type}，扣除金额：${
+                                            config.getDouble("${identifyLoreToNode[key]}.Spend")
+                                        }")
                                         if (!bankWithdraw.transactionSuccess()) {
                                             failure += 1
                                             continue
@@ -201,7 +203,7 @@ object REMenu {
                                     "pointsidentify" -> {
                                         val take = REPlayerPoints.getPlayerPointsAPI()
                                             .take(player.uniqueId, config.getInt("${identifyLoreToNode[key]}.Spend"))
-                                        logger.finest("点券扣除结果：${take}")
+                                        logger.verbose("点券扣除结果：${take}")
                                         if (!take) {
                                             failure += 1
                                             continue
