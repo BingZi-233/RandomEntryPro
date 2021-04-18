@@ -1,0 +1,4 @@
+Draw:
+  ExistingWarehouse: '您当前存在以下临时仓库：'
+  WarehouseList: '> %s'
+  NoSuchWarehouse: '没有这个仓库，请检查您输入的仓库是否正确。'

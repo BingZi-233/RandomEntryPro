@@ -1,0 +1,4 @@
+test:
+  IdentifyLore: "点券测试"
+  RandomList:
+    - "点券鉴定成功"

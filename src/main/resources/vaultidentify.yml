@@ -1,0 +1,4 @@
+test:
+  IdentifyLore: "金币测试"
+  RandomList:
+    - "金币鉴定成功"
