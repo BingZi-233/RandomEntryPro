@@ -1,0 +1,13 @@
+# 设置
+Settings:
+  # 日志等级
+  # 注意：过低的日志等级会导致日志文件变大
+  # VERBOSE   ->    详细
+  # FINEST    ->    最好的
+  # FINE      ->    精细
+  # INFO      ->    信息
+  # WARN      ->    警告
+  # ERROR     ->    错误
+  # FATAL     ->    致命
+  # []        ->    默认【INFO】
+  Logger: INFO

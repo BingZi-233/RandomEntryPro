@@ -1,0 +1,62 @@
+# 注意：所有为[ ]的地方，都可以被放置物品。
+Title: "&l[相思梦泽] - 随机鉴定"
+Shape:
+  - '#########'
+  - '#       #'
+  - '#       #'
+  - '#       #'
+  - '##A#B#C##'
+Buttons:
+  '#':
+    display:
+      # 类型
+      mats: WHITE_STAINED_GLASS_PANE
+      # 名字
+      name: "&7&l梦泽界限"
+      # 描述
+      lore:
+        - ""
+        - "&7&l无法逾越的底线"
+        - "&7&l&m================="
+        - "&8&l&o插件编写者:冰上云梦"
+      # 发光（附魔效果，但没有实际的附魔属性）
+      shiny: true
+      # 隐藏属性
+      flag:
+        - "HIDE_ATTRIBUTES"
+  # 确定
+  'A':
+    display:
+      mats: REDSTONE_TORCH
+      name: "&a&l金币确定"
+      lore:
+        - ""
+        - "&a&l> 确定鉴定"
+        - "&7&l&m================="
+        - "&8&l&o插件编写者:冰上云梦"
+      flag:
+        - "HIDE_ATTRIBUTES"
+  # 取消
+  'B':
+    display:
+      mats: LEVER
+      name: "&a&l退还"
+      lore:
+        - ""
+        - "&a&l取消鉴定并且返还所有物品"
+        - "&7&l&m================="
+        - "&8&l&o插件编写者:冰上云梦"
+      flag:
+        - "HIDE_ATTRIBUTES"
+  # 确定
+  'C':
+    display:
+      mats: REDSTONE_TORCH
+      name: "&a&l点券鉴定"
+      lore:
+        - ""
+        - "&a&l> 确定鉴定"
+        - "&7&l&m================="
+        - "&8&l&o插件编写者:冰上云梦"
+      flag:
+        - "HIDE_ATTRIBUTES"
