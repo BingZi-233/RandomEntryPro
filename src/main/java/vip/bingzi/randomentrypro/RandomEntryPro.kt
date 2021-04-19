@@ -5,6 +5,7 @@ import io.izzel.taboolib.module.config.TConfig
 import io.izzel.taboolib.module.inject.TInject
 import io.izzel.taboolib.module.locale.logger.TLogger
 import vip.bingzi.randomentrypro.io.REMenu.menuInspection
+import vip.bingzi.randomentrypro.net.Metrics
 import vip.bingzi.randomentrypro.util.REPlayerPoints
 import vip.bingzi.randomentrypro.util.REUtil.logger
 import vip.bingzi.randomentrypro.util.REVault
@@ -45,6 +46,8 @@ object RandomEntryPro : Plugin() {
         logger.info("-   ${REVault.setupEconomy()}")
         logger.info("> PlayerPoints")
         logger.info("-   ${REPlayerPoints.hookPlayerPoints()}")
+        // 匿名收集，服务由bStats提供
+        Metrics(plugin, 11089)
         logger.info("初始化完成")
     }
 
