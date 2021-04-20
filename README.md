@@ -1,22 +1,4 @@
-# TabooLib SDK
-
-## Settings
-```groovy
-taboolib {
-    tabooLibVersion = '5.58'
-    loaderVersion = '2.12'
-    classifier = null
-    // relocate package
-    relocate('io.izzel.taboolib', 'ink.ptms.taboolib')
-    // built-in
-    builtin = true
-}
-```
-
-## Release Source Code
-````groovy
-processResources {
-    from(sourceSets.main.allSource) {
-    exclude 'plugin.yml'
-}
-````
+![宣传图](image/宣传页图片.png)
+![状态图1](https://img.shields.io/github/v/release/BingZi-233/RandomEntryPro?style=for-the-badge&logo=appveyor)
+![状态图2](https://img.shields.io/github/last-commit/BingZi-233/RandomEntryPro?style=for-the-badge&logo=appveyor)
+![状态图3](https://img.shields.io/tokei/lines/github/BingZi-233/RandomEntryPro?style=for-the-badge&logo=appveyor)
