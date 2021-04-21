@@ -57,23 +57,27 @@ object REMenu {
             it.rows(config.getStringListColored("Shape").size)
             it.items(*config.getStringList("Shape").toTypedArray())
             for (key in config.getConfigurationSection("Buttons")!!.getKeys(false)) {
-                if (key == " ") continue
-                val itemBuilder =
-                    ItemBuilder(Material.matchMaterial(config.getString("Buttons.${key}.display.mats").toString()))
-                itemBuilder.lore(config.getStringListColored("Buttons.${key}.display.lore"))
-                itemBuilder.name(config.getStringColored("Buttons.${key}.display.name"))
-                for (s in config.getStringList("Buttons.${key}.display.flag")) {
-                    itemBuilder.flags(ItemFlag.valueOf(s))
+                try {
+                    if (key == " ") continue
+                    val itemBuilder =
+                        ItemBuilder(Material.matchMaterial(config.getString("Buttons.${key}.display.mats").toString()))
+                    itemBuilder.lore(config.getStringListColored("Buttons.${key}.display.lore"))
+                    itemBuilder.name(config.getStringColored("Buttons.${key}.display.name"))
+                    for (s in config.getStringList("Buttons.${key}.display.flag")) {
+                        itemBuilder.flags(ItemFlag.valueOf(s))
+                    }
+                    if (config.getBoolean("Buttons.${key}.display.shiny")) {
+                        itemBuilder.shiny()
+                    }
+                    val build = itemBuilder.build()
+                    getNBTCompound(build).also { nbtCompound ->
+                        nbtCompound["Menu"] = NBTBase.toNBT("true")
+                        nbtCompound.saveTo(build)
+                    }
+                    it.put(key.toCharArray()[0], build)
+                } catch (e: NullPointerException) {
+                    logger.warn("请注意！在构建菜单的时候发生了异常，请检查GUI文件物品ID是否符合当前版本需求。默认提供的版本为1.13及其以上适用的ID，如果使用1.12及其以下版本请更换物品ID。")
                 }
-                if (config.getBoolean("Buttons.${key}.display.shiny")) {
-                    itemBuilder.shiny()
-                }
-                val build = itemBuilder.build()
-                getNBTCompound(build).also { nbtCompound ->
-                    nbtCompound["Menu"] = NBTBase.toNBT("true")
-                    nbtCompound.saveTo(build)
-                }
-                it.put(key.toCharArray()[0], build)
             }
             it.event { clickEvent ->
                 when (clickEvent.slot) {
