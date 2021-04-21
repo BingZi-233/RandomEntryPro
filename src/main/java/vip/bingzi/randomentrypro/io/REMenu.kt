@@ -11,9 +11,11 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
+import vip.bingzi.randomentrypro.RandomEntryPro
 import vip.bingzi.randomentrypro.util.REPlayerPoints
 import vip.bingzi.randomentrypro.util.REUtil.getNBTCompound
 import vip.bingzi.randomentrypro.util.REUtil.logger
+import vip.bingzi.randomentrypro.util.REUtil.randomValue
 import vip.bingzi.randomentrypro.util.REVault
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -94,7 +96,7 @@ object REMenu {
                             return@event
                         }
                         val measureTimeMillis = measureTimeMillis {
-                            determine(appraisalScope, clickEvent.inventory, "vaultidentify", plugin, player)
+                            determine(appraisalScope, clickEvent.inventory, "vaultidentify", player)
                         }
                         logger.fine("金币鉴定耗时${measureTimeMillis}")
 
@@ -118,7 +120,7 @@ object REMenu {
                             return@event
                         }
                         val measureTimeMillis = measureTimeMillis {
-                            determine(appraisalScope, clickEvent.inventory, "pointsidentify", plugin, player)
+                            determine(appraisalScope, clickEvent.inventory, "pointsidentify", player)
                         }
                         logger.fine("点券鉴定耗时${measureTimeMillis}")
                     }
@@ -167,11 +169,21 @@ object REMenu {
      * @param list 要鉴定的物品位置
      * @param inventory 要鉴定的页面
      * @param info 以什么方式进行鉴定
-     * @param plugin 插件主体
      * @param player 玩家
      */
-    private fun determine(list: ArrayList<Int>, inventory: Inventory, info: String, plugin: Plugin, player: Player) {
-        val config = TConfig.create(File("${plugin.dataFolder}/${info}.yml"))
+    private fun determine(list: ArrayList<Int>, inventory: Inventory, info: String, player: Player) {
+        val config: TConfig = when (info) {
+            "vaultidentify" -> {
+                RandomEntryPro.vaultidentify
+            }
+            "pointsidentify" -> {
+                RandomEntryPro.pointsidentify
+            }
+            else -> {
+                logger.warn("未指定菜单名，无法进行鉴定操作！")
+                return
+            }
+        }
         val identifyLoreToRandomList = hashMapOf<String, List<String>>()
         val identifyLoreToNode = hashMapOf<String, String>()
         for (s in config.getKeys(false)) {
@@ -179,61 +191,61 @@ object REMenu {
             identifyLoreToNode[string] = s
             identifyLoreToRandomList[string] = config.getStringListColored("${s}.RandomList")
         }
+        // 成功个数
         var success = 0
+        // 失败个数
         var failure = 0
+        // 未找到个数
         var notFound = 0
         for (i in list) {
             logger.finest("正在鉴定${i + 1}处位置的物品")
             val item = inventory.getItem(i)
-            if (item != null) {
-                val itemMeta = item.itemMeta
-                if (itemMeta != null) {
-                    val lore = itemMeta.lore
-                    if (lore != null) {
-                        for (key in identifyLoreToRandomList.keys) {
-                            if (lore.indexOf(key) != -1) {
-                                when (info) {
-                                    "vaultidentify" -> {
-                                        val bankWithdraw = REVault.getEconomy()
-                                            .withdrawPlayer(player,
-                                                config.getDouble("${identifyLoreToNode[key]}.Spend"))
-                                        logger.verbose("金币扣除结果：${bankWithdraw.transactionSuccess()}，返回类型：${bankWithdraw.type}，扣除金额：${
-                                            config.getDouble("${identifyLoreToNode[key]}.Spend")
-                                        }")
-                                        if (!bankWithdraw.transactionSuccess()) {
-                                            failure += 1
-                                            continue
-                                        }
-                                    }
-                                    "pointsidentify" -> {
-                                        val take = REPlayerPoints.getPlayerPointsAPI()
-                                            .take(player.uniqueId, config.getInt("${identifyLoreToNode[key]}.Spend"))
-                                        logger.verbose("点券扣除结果：${take}")
-                                        if (!take) {
-                                            failure += 1
-                                            continue
-                                        }
+            val itemMeta = item!!.itemMeta
+            if (itemMeta != null) {
+                val lore = itemMeta.lore
+                if (lore != null) {
+                    for (key in identifyLoreToRandomList.keys) {
+                        if (lore.indexOf(key) != -1) {
+                            when (info) {
+                                "vaultidentify" -> {
+                                    val bankWithdraw = REVault.getEconomy()
+                                        .withdrawPlayer(player,
+                                            config.getDouble("${identifyLoreToNode[key]}.Spend"))
+                                    logger.verbose("金币扣除结果：${bankWithdraw.transactionSuccess()}，返回类型：${bankWithdraw.type}，扣除金额：${
+                                        config.getDouble("${identifyLoreToNode[key]}.Spend")
+                                    }")
+                                    if (!bankWithdraw.transactionSuccess()) {
+                                        failure += 1
+                                        continue
                                     }
                                 }
-                                lore[lore.indexOf(key)] = identifyLoreToRandomList[key]!!.random()
-                                itemMeta.lore = lore
-                                item.itemMeta = itemMeta
-                                inventory.setItem(i, item)
-                                success += 1
-                            } else {
-                                notFound += 1
+                                "pointsidentify" -> {
+                                    val take = REPlayerPoints.getPlayerPointsAPI()
+                                        .take(player.uniqueId, config.getInt("${identifyLoreToNode[key]}.Spend"))
+                                    logger.verbose("点券扣除结果：${take}")
+                                    if (!take) {
+                                        failure += 1
+                                        continue
+                                    }
+                                }
                             }
+                            lore[lore.indexOf(key)] = randomValue(identifyLoreToRandomList[key]!!.random())
+                            itemMeta.lore = lore
+                            item.itemMeta = itemMeta
+                            inventory.setItem(i, item)
+                            success += 1
+                        } else {
+                            notFound += 1
                         }
-                        logger.fine("已鉴定${i + 1}处位置的物品")
-                    } else {
-                        logger.fine("${i + 1}处位置的物品缺少必要的Lore，不支持鉴定。")
                     }
+                    logger.fine("已鉴定${i + 1}处位置的物品")
                 } else {
-                    logger.fine("${i + 1}处位置的物品没有Lore，不支持鉴定。")
+                    logger.fine("${i + 1}处位置的物品缺少必要的Lore，不支持鉴定。")
                 }
             } else {
-                logger.fine("${i + 1}处位置的物品为空，不支持鉴定。")
+                logger.fine("${i + 1}处位置的物品没有Lore，不支持鉴定。")
             }
+
         }
         player.sendMessage(TLocale.asString("Identify.Complete").format(success, failure, notFound, list.size))
     }
