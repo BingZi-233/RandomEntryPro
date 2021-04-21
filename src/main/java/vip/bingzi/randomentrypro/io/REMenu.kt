@@ -77,6 +77,7 @@ object REMenu {
                     it.put(key.toCharArray()[0], build)
                 } catch (e: NullPointerException) {
                     logger.warn("请注意！在构建菜单的时候发生了异常，请检查GUI文件物品ID是否符合当前版本需求。默认提供的版本为1.13及其以上适用的ID，如果使用1.12及其以下版本请更换物品ID。")
+                    return
                 }
             }
             it.event { clickEvent ->
