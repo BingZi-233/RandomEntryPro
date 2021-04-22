@@ -6,6 +6,7 @@ import io.izzel.taboolib.module.nms.NMS
 import io.izzel.taboolib.module.nms.nbt.NBTCompound
 import org.bukkit.inventory.ItemStack
 import vip.bingzi.randomentrypro.RandomEntryPro
+import kotlin.random.Random
 
 object REUtil {
     // 日志系统
@@ -21,7 +22,8 @@ object REUtil {
     fun randomValue(string: String): String {
         val replaceString = hashMapOf<String, String>()
         var temp = string
-        val regex = Regex(pattern = """\d*.-.\d+""")
+        // 匹配XXX-XXX或者XXX - XXX格式以及XXX.XX-XXX.XX或者XXX.XX - XXX.XX
+        val regex = Regex(pattern = """\d*.-.\d+|(-?\d+)(\.\d*).-.(-?\d+)(\.\d*)?${'$'}""")
         for ((i, matchResult) in regex.findAll(string).withIndex()) {
             logger.verbose("匹配的第 $i 个为: ${matchResult.value}")
             replaceString[matchResult.value] = randomRange(matchResult.value)
@@ -35,11 +37,13 @@ object REUtil {
     }
 
     private fun randomRange(string: String): String {
+        val isDoubleType = Regex("""(-?\d+)(\.\d*)""")
         val split = string.split("-")
         if (split.size == 2) {
-            val toString = (split[0].toInt()..split[1].toInt()).random().toString()
-            logger.verbose("随机后的结果为：$toString")
-            return toString
+            if (isDoubleType.containsMatchIn(split[0]) && isDoubleType.containsMatchIn(split[1])) {
+                return Random.nextDouble(split[0].toDouble(), split[1].toDouble()).toString()
+            }
+            return Random.nextInt(split[0].toInt(), split[1].toInt()).toString()
         }
         return string
     }
