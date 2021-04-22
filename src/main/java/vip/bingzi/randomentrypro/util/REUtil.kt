@@ -21,7 +21,7 @@ object REUtil {
     fun randomValue(string: String): String {
         val replaceString = hashMapOf<String, String>()
         var temp = string
-        val regex = Regex(pattern = """\d+.-.\d+""")
+        val regex = Regex(pattern = """\d*.-.\d+""")
         for ((i, matchResult) in regex.findAll(string).withIndex()) {
             logger.verbose("匹配的第 $i 个为: ${matchResult.value}")
             replaceString[matchResult.value] = randomRange(matchResult.value)
