@@ -40,7 +40,7 @@ object REUtil {
         val isDoubleType = Regex("""(-?\d+)(\.\d*)""")
         val split = string.split("-")
         if (split.size == 2) {
-            if (isDoubleType.containsMatchIn(split[0]) && isDoubleType.containsMatchIn(split[1])) {
+            if (isDoubleType.containsMatchIn(split[0]) || isDoubleType.containsMatchIn(split[1])) {
                 return Random.nextDouble(split[0].toDouble(), split[1].toDouble()).toString()
             }
             return Random.nextInt(split[0].toInt(), split[1].toInt()).toString()
