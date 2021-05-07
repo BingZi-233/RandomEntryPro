@@ -1,11 +1,11 @@
 package vip.bingzi.randomentrypro.io
 
+import io.izzel.taboolib.internal.xseries.XMaterial
 import io.izzel.taboolib.module.config.TConfig
 import io.izzel.taboolib.module.locale.TLocale
 import io.izzel.taboolib.module.nms.nbt.NBTBase
 import io.izzel.taboolib.util.item.ItemBuilder
 import io.izzel.taboolib.util.item.inventory.MenuBuilder
-import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemFlag
@@ -62,7 +62,8 @@ object REMenu {
                 try {
                     if (key == " ") continue
                     val itemBuilder =
-                        ItemBuilder(Material.matchMaterial(config.getString("Buttons.${key}.display.mats").toString()))
+                        ItemBuilder(XMaterial.matchXMaterial(config.getString("Buttons.${key}.display.mats").toString())
+                            .get().parseMaterial())
                     itemBuilder.lore(config.getStringListColored("Buttons.${key}.display.lore"))
                     itemBuilder.name(config.getStringColored("Buttons.${key}.display.name"))
                     for (s in config.getStringList("Buttons.${key}.display.flag")) {
@@ -257,7 +258,7 @@ object REMenu {
         val playerInventory = player.inventory
         for (i in list) {
             val item = inventory.getItem(i)
-            inventory.setItem(i, ItemStack(Material.AIR))
+            inventory.setItem(i, ItemStack(XMaterial.AIR.parseMaterial()!!))
             if (playerInventory.firstEmpty() != -1) {
                 playerInventory.setItem(playerInventory.firstEmpty(), item)
             } else {
