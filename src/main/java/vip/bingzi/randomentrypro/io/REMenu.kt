@@ -62,8 +62,8 @@ object REMenu {
                 try {
                     if (key == " ") continue
                     val itemBuilder =
-                        ItemBuilder(XMaterial.matchXMaterial(config.getString("Buttons.${key}.display.mats").toString())
-                            .get().parseMaterial())
+                        ItemBuilder(XMaterial.valueOf(config.getStringColored("Buttons.${key}.display.mats"))
+                            .parseMaterial())
                     itemBuilder.lore(config.getStringListColored("Buttons.${key}.display.lore"))
                     itemBuilder.name(config.getStringColored("Buttons.${key}.display.name"))
                     for (s in config.getStringList("Buttons.${key}.display.flag")) {
